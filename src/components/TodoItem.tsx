@@ -1,7 +1,19 @@
 import { FaTrash, FaInfoCircle } from "react-icons/fa";
 
-function TodoItem({ todo, onToggle, onDelete }) {
-    return (
+type Todo = {
+    id: number;
+    text: string;
+    done: boolean;
+};
+
+type TodoItemProps = {
+    todo: Todo;
+    onToggle: () => void;
+    onDelete: () => void;
+};
+
+const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) =>
+    (
         <li
             className="flex items-center gap-3 py-3 px-4 border-b last:border-none transition hover:bg-gray-50"
         >
@@ -41,6 +53,5 @@ function TodoItem({ todo, onToggle, onDelete }) {
             </div>
         </li>
     );
-}
 
 export default TodoItem;
