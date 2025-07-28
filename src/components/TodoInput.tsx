@@ -1,9 +1,13 @@
 import { useState } from "react";
 
-export default function TodoInput({ onAdd }) {
+type TodoInputProps = {
+    onAdd: (text: string) => void;
+}
+
+const TodoInput: React.FC<TodoInputProps> = ({ onAdd }) => {
     const [value, setValue] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const text = value.trim();
         if (text) {
@@ -32,4 +36,6 @@ export default function TodoInput({ onAdd }) {
             </button>
         </form>
     );
-}
+};
+
+export default TodoInput
