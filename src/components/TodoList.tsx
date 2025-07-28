@@ -1,7 +1,13 @@
 import TodoItem from './TodoItem';
+import type { Todo } from '@/types'
 
-function TodoList({ todos, onToggle, onDelete }) {
-    return(
+type TodoListProps = {
+    todos: Todo[];
+    onToggle: (id: number) => void;
+    onDelete: (id: number) => void;
+};
+
+const TodoList: React.FC<TodoListProps> = ({ todos, onToggle, onDelete }) => (
         <ul
             className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto divide-y mt-8 overflow-hidden"
         >
@@ -15,6 +21,5 @@ function TodoList({ todos, onToggle, onDelete }) {
             ))}
         </ul>
     );
-}
 
 export default TodoList;
