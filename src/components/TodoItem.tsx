@@ -1,5 +1,5 @@
 import { FaTrash, FaInfoCircle } from "react-icons/fa";
-import type { Todo } from "../types"
+import type { Todo } from "@/types"
 
 type TodoItemProps = {
     todo: Todo;
