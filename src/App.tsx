@@ -2,27 +2,28 @@ import './App.css';
 import { useState, useRef } from "react";
 import TodoList from './components/TodoList';
 import TodoInput from './components/TodoInput';
+import type { Todo } from '@/types'
 
-const dummyTodos = [
+const dummyTodos: Todo[] = [
   { id: 1, text: "コーヒー豆を買う", done: false },
   { id: 2, text: "日記を書く", done: false },
   { id: 3, text: "散歩する", done: true },
 ];
 
-function App() {
+const App: React.FC<{}> = () => {
   const [todos, setTodos] = useState(
     dummyTodos
   );
   const nextId = useRef(dummyTodos.length + 1);
 
-  const handleAddTodo = (text) => {
+  const handleAddTodo = (text: string) => {
     setTodos([
       ...todos,
       { id: nextId.current++, text: text, done: false }
     ]);
   };
 
-  const handleToggleTodo = (id) => {
+  const handleToggleTodo = (id: number) => {
     setTodos(todos =>
       todos.map(todo =>
         todo.id === id ? { ...todo, done: !todo.done } : todo
@@ -30,7 +31,7 @@ function App() {
     )
   }
 
-  const handleDeleteTodo = (id) => {
+  const handleDeleteTodo = (id: number) => {
     setTodos(todos => todos.filter(todo => todo.id !== id));
   };
 
