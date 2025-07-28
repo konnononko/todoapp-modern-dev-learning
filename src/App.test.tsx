@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 
-async function addTodo(text) {
+async function addTodo(text: string) {
     const input = screen.getByPlaceholderText(/新しいTodoを入力/i);
     const button = screen.getByRole('button', { name: '追加'});
     await userEvent.type(input, text);
@@ -30,8 +30,8 @@ test('Todoを削除できる', async () => {
     const todo =screen.getByText(testTodo);
     expect(todo).toBeInTheDocument();
 
-    const deleteButton = todo.closest('li').querySelector('button[title="削除"]');
-    await userEvent.click(deleteButton);
+    const deleteButton = todo.closest('li')?.querySelector('button[title="削除"]');
+    await userEvent.click(deleteButton!);
 
     expect(todo).not.toBeInTheDocument();
 });
@@ -42,8 +42,11 @@ test('チェックボックスで完了状態を切り替えられる。完了�
     await addTodo(testTodo);
 
     const todo = screen.getByText(testTodo);
-    const checkbox = todo.closest('li').querySelector('input[type="checkbox"]');
-
+    const checkbox = todo.closest('li')?.querySelector('input[type="checkbox"]');
+    if (!checkbox || !(checkbox instanceof HTMLInputElement))
+    {
+        throw new Error('checkboxが見つかりません')
+    }
     expect(checkbox.checked).toBe(false);
     expect(todo).not.toHaveClass('line-through');
 
@@ -62,8 +65,8 @@ test ('Todoを追加するとidが一意に割り振られる', async () => {
     await addTodo('B');
 
     const ids = screen.getAllByLabelText('情報')
-        .map(icon => document.getElementById(icon.getAttribute('aria-describedby')))
-        .map(span => parseInt(span.textContent.replace('id: ', ''), 10));
+        .map(icon => document.getElementById(icon.getAttribute('aria-describedby')!))
+        .map(span => parseInt(span!.textContent!.replace('id: ', ''), 10));
 
     expect(ids.length).toBeGreaterThanOrEqual(2);
     expect(ids.length).toBe(new Set(ids).size);
