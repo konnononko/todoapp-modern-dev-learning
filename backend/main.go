@@ -39,6 +39,12 @@ func addTodo(todo Todo) Todo {
 	return todo
 }
 
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(v)
+}
+
 func createTodo(w http.ResponseWriter, r *http.Request) {
 	var newTodo Todo
 	if err := json.NewDecoder(r.Body).Decode(&newTodo); err != nil {
@@ -47,8 +53,5 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	created := addTodo(newTodo)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	writeJSON(w, http.StatusCreated, created)
 }
