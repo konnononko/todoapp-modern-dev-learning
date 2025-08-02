@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -58,6 +59,24 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteTodo(w http.ResponseWriter, r *http.Request) {
-	todos = []Todo{}
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
+	}
+
+	index := -1
+	for i, todo := range todos {
+		if todo.ID == id {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return
+	}
+
+	todos = append(todos[:index], todos[index+1:]...)
 	w.WriteHeader(http.StatusNoContent)
 }

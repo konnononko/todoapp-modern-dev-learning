@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func assertEqual[T comparable](t *testing.T, expected, actual T) {
@@ -103,8 +105,32 @@ func TestDeleteTodo(t *testing.T) {
 	req := httptest.NewRequest("DELETE", fmt.Sprintf("/todos/%d", added.ID), nil)
 	rr := httptest.NewRecorder()
 
-	deleteTodo(rr, req)
+	r := chi.NewRouter()
+	r.Delete("/todos/{id}", deleteTodo)
+	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusNoContent, rr.Code)
 	assertEqual(t, 0, len(todos))
+}
+
+func TestDeleteTodo_MultipleTodos(t *testing.T) {
+	resetState()
+	addTodo(Todo{Title: "task1", Done: false})
+	todo2 := addTodo(Todo{Title: "task2", Done: false})
+	addTodo(Todo{Title: "task3", Done: false})
+
+	req := httptest.NewRequest("DELETE", fmt.Sprintf("/todos/%d", todo2.ID), nil)
+	rr := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Delete("/todos/{id}", deleteTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusNoContent, rr.Code)
+	assertEqual(t, 2, len(todos))
+	for _, todo := range todos {
+		if todo.ID == todo2.ID {
+			t.Errorf("id %d is not deleted", todo2.ID)
+		}
+	}
 }
