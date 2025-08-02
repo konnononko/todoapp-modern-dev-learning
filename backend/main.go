@@ -14,7 +14,7 @@ type Todo struct {
 	Done  bool   `json:"done"`
 }
 
-var todos = []Todo{}
+var todos = []Todo{{ID: -1, Title: "hoge", Done: false}}
 var nextID = 1
 
 func main() {
