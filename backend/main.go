@@ -22,6 +22,7 @@ func main() {
 	r.Use(middleware.Logger)
 
 	r.Get("/todos", getTodos)
+	r.Post("/todos", createTodo)
 
 	http.ListenAndServe(":8080", r)
 }
@@ -29,4 +30,20 @@ func main() {
 func getTodos(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(todos)
+}
+
+func createTodo(w http.ResponseWriter, r *http.Request) {
+	var newTodo Todo
+	if err := json.NewDecoder(r.Body).Decode(&newTodo); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	newTodo.ID = nextID
+	nextID++
+	todos = append(todos, newTodo)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newTodo)
 }
