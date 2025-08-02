@@ -62,6 +62,7 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
@@ -74,6 +75,7 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if index == -1 {
+		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
 	}
 

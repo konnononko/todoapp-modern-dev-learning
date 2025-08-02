@@ -134,3 +134,33 @@ func TestDeleteTodo_MultipleTodos(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteTodo_InvalidID(t *testing.T) {
+	resetState()
+	addTodo(Todo{Title: "task1", Done: false})
+
+	req := httptest.NewRequest("DELETE", "/todos/abc", nil)
+	rr := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Delete("/todos/{id}", deleteTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusBadRequest, rr.Code)
+	assertEqual(t, 1, len(todos))
+}
+
+func TestDeleteTodo_NotFound(t *testing.T) {
+	resetState()
+	addTodo(Todo{Title: "task1", Done: false})
+
+	req := httptest.NewRequest("DELETE", "/todos/-1", nil)
+	rr := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Delete("/todos/{id}", deleteTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusNotFound, rr.Code)
+	assertEqual(t, 1, len(todos))
+}
