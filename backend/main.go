@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -41,10 +42,10 @@ func addTodo(todo Todo) Todo {
 	return todo
 }
 
-func writeJSON(w http.ResponseWriter, status int, v any) {
+func writeJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
+	return json.NewEncoder(w).Encode(v)
 }
 
 func createTodo(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,9 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	created := addTodo(newTodo)
-	writeJSON(w, http.StatusCreated, created)
+	if err := writeJSON(w, http.StatusCreated, created); err != nil {
+		log.Println("createTodo writeJSON failed")
+	}
 }
 
 func deleteTodo(w http.ResponseWriter, r *http.Request) {
