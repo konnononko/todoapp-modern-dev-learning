@@ -95,3 +95,16 @@ func TestCreateTodo_BadRequest(t *testing.T) {
 	assertEqual(t, http.StatusBadRequest, rr.Code)
 	assertEqual(t, 1, len(todos))
 }
+
+func TestDeleteTodo(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	req := httptest.NewRequest("DELETE", fmt.Sprintf("/todos/%d", added.ID), nil)
+	rr := httptest.NewRecorder()
+
+	deleteTodo(rr, req)
+
+	assertEqual(t, http.StatusNoContent, rr.Code)
+	assertEqual(t, 0, len(todos))
+}

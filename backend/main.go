@@ -23,6 +23,7 @@ func main() {
 
 	r.Get("/todos", getTodos)
 	r.Post("/todos", createTodo)
+	r.Delete("/todos/{id}", deleteTodo)
 
 	http.ListenAndServe(":8080", r)
 }
@@ -54,4 +55,9 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 
 	created := addTodo(newTodo)
 	writeJSON(w, http.StatusCreated, created)
+}
+
+func deleteTodo(w http.ResponseWriter, r *http.Request) {
+	todos = []Todo{}
+	w.WriteHeader(http.StatusNoContent)
 }
