@@ -23,6 +23,14 @@ func resetState() {
 	nextID = 1
 }
 
+func setupRouter() *chi.Mux {
+	r := chi.NewRouter()
+	r.Get("/todos", getTodos)
+	r.Post("/todos", createTodo)
+	r.Delete("/todos/{id}", deleteTodo)
+	return r
+}
+
 func TestGetTodos(t *testing.T) {
 	todos = []Todo{{ID: -1, Title: "hoge", Done: false}}
 	nextID = 1
@@ -105,8 +113,7 @@ func TestDeleteTodo(t *testing.T) {
 	req := httptest.NewRequest("DELETE", fmt.Sprintf("/todos/%d", added.ID), nil)
 	rr := httptest.NewRecorder()
 
-	r := chi.NewRouter()
-	r.Delete("/todos/{id}", deleteTodo)
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusNoContent, rr.Code)
@@ -122,8 +129,7 @@ func TestDeleteTodo_MultipleTodos(t *testing.T) {
 	req := httptest.NewRequest("DELETE", fmt.Sprintf("/todos/%d", todo2.ID), nil)
 	rr := httptest.NewRecorder()
 
-	r := chi.NewRouter()
-	r.Delete("/todos/{id}", deleteTodo)
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusNoContent, rr.Code)
@@ -142,8 +148,7 @@ func TestDeleteTodo_InvalidID(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/todos/abc", nil)
 	rr := httptest.NewRecorder()
 
-	r := chi.NewRouter()
-	r.Delete("/todos/{id}", deleteTodo)
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusBadRequest, rr.Code)
@@ -157,8 +162,7 @@ func TestDeleteTodo_NotFound(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/todos/-1", nil)
 	rr := httptest.NewRecorder()
 
-	r := chi.NewRouter()
-	r.Delete("/todos/{id}", deleteTodo)
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusNotFound, rr.Code)
