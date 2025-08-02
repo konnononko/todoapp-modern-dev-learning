@@ -16,6 +16,11 @@ func assertEqual[T comparable](t *testing.T, expected, actual T) {
 	}
 }
 
+func resetState() {
+	todos = []Todo{}
+	nextID = 1
+}
+
 func TestGetTodos(t *testing.T) {
 	todos = []Todo{{ID: -1, Title: "hoge", Done: false}}
 	nextID = 1
@@ -34,8 +39,7 @@ func TestGetTodos(t *testing.T) {
 }
 
 func TestCreateTodo(t *testing.T) {
-	todos = []Todo{}
-	nextID = 1
+	resetState()
 
 	payload := `{"title": "新しいタスク", "done": false}`
 	req := httptest.NewRequest("POST", "/todos", strings.NewReader(payload))
@@ -55,8 +59,7 @@ func TestCreateTodo(t *testing.T) {
 }
 
 func TestCreateTodo_MultipleAdds(t *testing.T) {
-	todos = []Todo{}
-	nextID = 1
+	resetState()
 
 	titles := []string{"task1", "task2", "task3"}
 
