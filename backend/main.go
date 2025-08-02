@@ -32,6 +32,13 @@ func getTodos(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todos)
 }
 
+func addTodo(todo Todo) Todo {
+	todo.ID = nextID
+	nextID++
+	todos = append(todos, todo)
+	return todo
+}
+
 func createTodo(w http.ResponseWriter, r *http.Request) {
 	var newTodo Todo
 	if err := json.NewDecoder(r.Body).Decode(&newTodo); err != nil {
@@ -39,11 +46,9 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTodo.ID = nextID
-	nextID++
-	todos = append(todos, newTodo)
+	created := addTodo(newTodo)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newTodo)
+	json.NewEncoder(w).Encode(created)
 }
