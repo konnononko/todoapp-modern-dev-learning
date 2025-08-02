@@ -17,6 +17,9 @@ func assertEqual[T comparable](t *testing.T, expected, actual T) {
 }
 
 func TestGetTodos(t *testing.T) {
+	todos = []Todo{{ID: -1, Title: "hoge", Done: false}}
+	nextID = 1
+
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("Get", "/todos", nil)
 
