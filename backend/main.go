@@ -16,6 +16,11 @@ type Todo struct {
 	Done  bool   `json:"done"`
 }
 
+type PatchTodo struct {
+	Title *string `json:"title"`
+	Done  *bool   `json:"done"`
+}
+
 var todos = []Todo{}
 var nextID = 1
 
@@ -25,6 +30,7 @@ func main() {
 
 	r.Get("/todos", getTodos)
 	r.Post("/todos", createTodo)
+	r.Patch("/todos/{id}", updateTodo)
 	r.Delete("/todos/{id}", deleteTodo)
 
 	http.ListenAndServe(":8080", r)
@@ -85,4 +91,41 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 
 	todos = append(todos[:index], todos[index+1:]...)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func updateTodo(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	var patch PatchTodo
+	if err := json.NewDecoder(r.Body).Decode(&patch); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	var found *Todo = nil
+	for i := range todos {
+		if todos[i].ID == id {
+			found = &todos[i]
+			break
+		}
+	}
+	if found == nil {
+		http.Error(w, "Todo not found", http.StatusNotFound)
+		return
+	}
+
+	if patch.Title != nil {
+		found.Title = *patch.Title
+	}
+	if patch.Done != nil {
+		found.Done = *patch.Done
+	}
+	if err := writeJSON(w, http.StatusOK, found); err != nil {
+		log.Println("updateTodo writeJSON failed")
+	}
 }

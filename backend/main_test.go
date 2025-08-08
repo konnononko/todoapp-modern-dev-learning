@@ -168,3 +168,80 @@ func TestDeleteTodo_NotFound(t *testing.T) {
 	assertEqual(t, http.StatusNotFound, rr.Code)
 	assertEqual(t, 1, len(todos))
 }
+
+func TestUpdateTodo_ToggleDone(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	payload := `{"done": true}`
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	r := setupRouter()
+	r.Patch("/todos/{id}", updateTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusOK, rr.Code)
+	var updated Todo
+	err := json.NewDecoder(rr.Body).Decode(&updated)
+	assertEqual(t, nil, err)
+	assertEqual(t, added.ID, updated.ID)
+	assertEqual(t, "task", updated.Title)
+	assertEqual(t, true, updated.Done)
+}
+
+func TestUpdateTodo_RenameTitle(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	payload := `{"title": "new title"}`
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	r := setupRouter()
+	r.Patch("/todos/{id}", updateTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusOK, rr.Code)
+	var updated Todo
+	err := json.NewDecoder(rr.Body).Decode(&updated)
+	assertEqual(t, nil, err)
+	assertEqual(t, added.ID, updated.ID)
+	assertEqual(t, "new title", updated.Title)
+	assertEqual(t, false, updated.Done)
+}
+
+func TestUpdateTodo_NotFound(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	payload := `{"done": true}`
+	req := httptest.NewRequest("PATCH", "/todos/999", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	r := setupRouter()
+	r.Patch("/todos/{id}", updateTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusNotFound, rr.Code)
+	assertEqual(t, added, todos[0])
+}
+
+func TestUpdateTodo_InvalidJson(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(`"done": true, "invalid": "json"`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	r := setupRouter()
+	r.Patch("/todos/{id}", updateTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusBadRequest, rr.Code)
+	assertEqual(t, added, todos[0])
+}
