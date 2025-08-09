@@ -263,3 +263,33 @@ func TestUpdateTodo_EmptyJson_Rejected(t *testing.T) {
 	assertEqual(t, http.StatusBadRequest, rr.Code)
 	assertEqual(t, added, todos[0])
 }
+
+func TestAddTodo_ConcurrentCall_NoDuplicateIDs(t *testing.T) {
+	resetState()
+
+	const goroutineCount = 100
+	doneCh := make(chan struct{}, goroutineCount)
+
+	for i := range goroutineCount {
+		go func(i int) {
+			addTodo(Todo{Title: fmt.Sprintf("task-%d", i)})
+			doneCh <- struct{}{}
+		}(i)
+	}
+
+	for i := 0; i < goroutineCount; i++ {
+		<-doneCh
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	assertEqual(t, goroutineCount, len(todos))
+	idSet := make(map[int]struct{}, goroutineCount)
+	for _, todo := range todos {
+		if _, exists := idSet[todo.ID]; exists {
+			t.Errorf("Duplicate ID found: %d", todo.ID)
+		}
+		idSet[todo.ID] = struct{}{}
+	}
+}
