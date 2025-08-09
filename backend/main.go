@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,8 +22,11 @@ type PatchTodo struct {
 	Done  *bool   `json:"done"`
 }
 
-var todos = []Todo{}
-var nextID = 1
+var (
+	todos  = []Todo{}
+	nextID = 1
+	mu     sync.Mutex
+)
 
 func main() {
 	r := chi.NewRouter()
@@ -37,12 +41,18 @@ func main() {
 }
 
 func getTodos(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(todos)
 }
 
 func addTodo(todo Todo) Todo {
+	mu.Lock()
+	defer mu.Unlock()
+
 	todo.ID = nextID
 	nextID++
 	todos = append(todos, todo)
@@ -84,6 +94,9 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	if index == -1 {
 		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
@@ -113,6 +126,9 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No fields to update", http.StatusBadRequest)
 		return
 	}
+
+	mu.Lock()
+	defer mu.Unlock()
 
 	var found *Todo = nil
 	for i := range todos {
