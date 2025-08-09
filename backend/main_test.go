@@ -230,11 +230,12 @@ func TestUpdateTodo_NotFound(t *testing.T) {
 	assertEqual(t, added, todos[0])
 }
 
-func TestUpdateTodo_InvalidJson(t *testing.T) {
+func TestUpdateTodo_UnknownField_Rejected(t *testing.T) {
 	resetState()
 	added := addTodo(Todo{Title: "task", Done: false})
 
-	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(`"done": true, "invalid": "json"`))
+	payload := `{"done": true, "invalid": "json"}`
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(payload))
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 

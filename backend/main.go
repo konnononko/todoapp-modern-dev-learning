@@ -102,7 +102,9 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var patch PatchTodo
-	if err := json.NewDecoder(r.Body).Decode(&patch); err != nil {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&patch); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
