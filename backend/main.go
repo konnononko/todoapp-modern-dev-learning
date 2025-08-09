@@ -109,6 +109,11 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if patch.Title == nil && patch.Done == nil {
+		http.Error(w, "No fields to update", http.StatusBadRequest)
+		return
+	}
+
 	var found *Todo = nil
 	for i := range todos {
 		if todos[i].ID == id {

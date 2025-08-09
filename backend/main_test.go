@@ -246,3 +246,20 @@ func TestUpdateTodo_UnknownField_Rejected(t *testing.T) {
 	assertEqual(t, http.StatusBadRequest, rr.Code)
 	assertEqual(t, added, todos[0])
 }
+
+func TestUpdateTodo_EmptyJson_Rejected(t *testing.T) {
+	resetState()
+	added := addTodo(Todo{Title: "task", Done: false})
+
+	payload := `{}`
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/todos/%d", added.ID), strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	r := setupRouter()
+	r.Patch("/todos/{id}", updateTodo)
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusBadRequest, rr.Code)
+	assertEqual(t, added, todos[0])
+}
