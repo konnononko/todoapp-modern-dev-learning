@@ -30,6 +30,11 @@ var (
 )
 
 func main() {
+	r := newRouter()
+	http.ListenAndServe(":8080", r)
+}
+
+func newRouter() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
@@ -45,7 +50,7 @@ func main() {
 	r.Patch("/todos/{id}", updateTodo)
 	r.Delete("/todos/{id}", deleteTodo)
 
-	http.ListenAndServe(":8080", r)
+	return r
 }
 
 func getTodos(w http.ResponseWriter, r *http.Request) {
