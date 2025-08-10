@@ -293,3 +293,52 @@ func TestAddTodo_ConcurrentCall_NoDuplicateIDs(t *testing.T) {
 		idSet[todo.ID] = struct{}{}
 	}
 }
+
+func TestCORSPreflight(t *testing.T) {
+	r := newRouter()
+
+	req := httptest.NewRequest("OPTIONS", "/todos", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+	req.Header.Set("Access-Control-Request-Method", "POST")
+	req.Header.Set("Access-Control-Request-Headers", "Content-Type")
+
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	// go-chi/cors の仕様で、200が返される
+	// RFC上は204が推奨
+	// assertEqual(t, http.StatusNoContent, rr.Code)
+	assertEqual(t, http.StatusOK, rr.Code)
+
+	allowOrigin := rr.Header().Get("Access-Control-Allow-Origin")
+	assertEqual(t, "http://localhost:3000", allowOrigin)
+
+	allowMethods := rr.Header().Get("Access-Control-Allow-Methods")
+	assertEqual(t, true, allowMethods != "")
+}
+
+func TestCORSPreflight_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
+	r := newRouter()
+
+	req := httptest.NewRequest("OPTIONS", "/todos", nil)
+	// not allowed origin
+	req.Header.Set("Origin", "https://google.com")
+	req.Header.Set("Access-Control-Request-Method", "POST")
+	req.Header.Set("Access-Control-Request-Headers", "Content-Type")
+
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	// go-chi/corsの仕様
+	// 403 Forbiddenや204 No Contentの実装もある
+	assertEqual(t, http.StatusOK, rr.Code)
+
+	allowOrigin := rr.Header().Get("Access-Control-Allow-Origin")
+	assertEqual(t, "", allowOrigin)
+
+	allowMethods := rr.Header().Get("Access-Control-Allow-Methods")
+	assertEqual(t, "", allowMethods)
+
+	allowHeaders := rr.Header().Get("Access-Control-Allow-Headers")
+	assertEqual(t, "", allowHeaders)
+}
