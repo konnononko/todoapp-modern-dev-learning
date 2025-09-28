@@ -28,7 +28,8 @@ func TestGetTodos(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("Get", "/todos", nil)
 
-	getTodos(rr, req)
+	r := setupRouter()
+	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusOK, rr.Code)
 
