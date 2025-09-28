@@ -7,8 +7,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 )
 
 func assertEqual[T comparable](t *testing.T, expected, actual T) {
@@ -21,14 +19,6 @@ func assertEqual[T comparable](t *testing.T, expected, actual T) {
 func resetState() {
 	todos = []Todo{}
 	nextID = 1
-}
-
-func setupRouter() *chi.Mux {
-	r := chi.NewRouter()
-	r.Get("/todos", getTodos)
-	r.Post("/todos", createTodo)
-	r.Delete("/todos/{id}", deleteTodo)
-	return r
 }
 
 func TestGetTodos(t *testing.T) {
@@ -179,7 +169,6 @@ func TestUpdateTodo_ToggleDone(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := setupRouter()
-	r.Patch("/todos/{id}", updateTodo)
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusOK, rr.Code)
@@ -201,7 +190,6 @@ func TestUpdateTodo_RenameTitle(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := setupRouter()
-	r.Patch("/todos/{id}", updateTodo)
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusOK, rr.Code)
@@ -223,7 +211,6 @@ func TestUpdateTodo_NotFound(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := setupRouter()
-	r.Patch("/todos/{id}", updateTodo)
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusNotFound, rr.Code)
@@ -240,7 +227,6 @@ func TestUpdateTodo_UnknownField_Rejected(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := setupRouter()
-	r.Patch("/todos/{id}", updateTodo)
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusBadRequest, rr.Code)
@@ -257,7 +243,6 @@ func TestUpdateTodo_EmptyJson_Rejected(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := setupRouter()
-	r.Patch("/todos/{id}", updateTodo)
 	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusBadRequest, rr.Code)
@@ -295,7 +280,7 @@ func TestAddTodo_ConcurrentCall_NoDuplicateIDs(t *testing.T) {
 }
 
 func TestCORSPreflight(t *testing.T) {
-	r := newRouter()
+	r := setupRouter()
 
 	req := httptest.NewRequest("OPTIONS", "/todos", nil)
 	req.Header.Set("Origin", "http://localhost:3000")
@@ -318,7 +303,7 @@ func TestCORSPreflight(t *testing.T) {
 }
 
 func TestCORSPreflight_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
-	r := newRouter()
+	r := setupRouter()
 
 	req := httptest.NewRequest("OPTIONS", "/todos", nil)
 	// not allowed origin

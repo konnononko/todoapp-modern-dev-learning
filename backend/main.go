@@ -30,11 +30,11 @@ var (
 )
 
 func main() {
-	r := newRouter()
+	r := setupRouter()
 	http.ListenAndServe(":8080", r)
 }
 
-func newRouter() http.Handler {
+func setupRouter() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
