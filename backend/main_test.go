@@ -47,7 +47,8 @@ func TestCreateTodo(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 
-	createTodo(rr, req)
+	r := setupRouter()
+	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusCreated, rr.Code)
 	var created Todo
@@ -64,13 +65,14 @@ func TestCreateTodo_MultipleAdds(t *testing.T) {
 
 	titles := []string{"task1", "task2", "task3"}
 
+	r := setupRouter()
 	for i, title := range titles {
 		payload := fmt.Sprintf(`{"title":"%s","done":false}`, title)
 		req := httptest.NewRequest("POST", "/todos", strings.NewReader(payload))
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		createTodo(rr, req)
+		r.ServeHTTP(rr, req)
 
 		assertEqual(t, http.StatusCreated, rr.Code)
 		var got Todo
@@ -91,7 +93,8 @@ func TestCreateTodo_BadRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 
-	createTodo(rr, req)
+	r := setupRouter()
+	r.ServeHTTP(rr, req)
 
 	assertEqual(t, http.StatusBadRequest, rr.Code)
 	assertEqual(t, 1, len(todos))
