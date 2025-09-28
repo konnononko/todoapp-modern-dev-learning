@@ -325,3 +325,31 @@ func TestCORSPreflight_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
 	allowHeaders := rr.Header().Get("Access-Control-Allow-Headers")
 	assertEqual(t, "", allowHeaders)
 }
+
+func TestCORSActualRequest(t *testing.T) {
+	req := httptest.NewRequest("GET", "/todos", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+
+	rr := httptest.NewRecorder()
+	r := setupRouter()
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusOK, rr.Code)
+
+	allowOrigin := rr.Header().Get("Access-Control-Allow-Origin")
+	assertEqual(t, "http://localhost:3000", allowOrigin)
+}
+
+func TestCORSActualRequest_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
+	req := httptest.NewRequest("GET", "/todos", nil)
+	req.Header.Set("Origin", "https://google.com")
+
+	rr := httptest.NewRecorder()
+	r := setupRouter()
+	r.ServeHTTP(rr, req)
+
+	assertEqual(t, http.StatusOK, rr.Code)
+
+	allowOrigin := rr.Header().Get("Access-Control-Allow-Origin")
+	assertEqual(t, "", allowOrigin)
+}
