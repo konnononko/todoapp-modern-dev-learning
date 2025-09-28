@@ -26,7 +26,7 @@ func TestGetTodos(t *testing.T) {
 	nextID = 1
 
 	rr := httptest.NewRecorder()
-	req := httptest.NewRequest("Get", "/todos", nil)
+	req := httptest.NewRequest("GET", "/todos", nil)
 
 	r := setupRouter()
 	r.ServeHTTP(rr, req)
