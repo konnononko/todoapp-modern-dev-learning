@@ -280,14 +280,13 @@ func TestAddTodo_ConcurrentCall_NoDuplicateIDs(t *testing.T) {
 }
 
 func TestCORSPreflight(t *testing.T) {
-	r := setupRouter()
-
 	req := httptest.NewRequest("OPTIONS", "/todos", nil)
 	req.Header.Set("Origin", "http://localhost:3000")
 	req.Header.Set("Access-Control-Request-Method", "POST")
 	req.Header.Set("Access-Control-Request-Headers", "Content-Type")
 
 	rr := httptest.NewRecorder()
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	// go-chi/cors の仕様で、200が返される
@@ -303,8 +302,6 @@ func TestCORSPreflight(t *testing.T) {
 }
 
 func TestCORSPreflight_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
-	r := setupRouter()
-
 	req := httptest.NewRequest("OPTIONS", "/todos", nil)
 	// not allowed origin
 	req.Header.Set("Origin", "https://google.com")
@@ -312,6 +309,7 @@ func TestCORSPreflight_NonAllowedOrigin_EmptyAccessControlAllow(t *testing.T) {
 	req.Header.Set("Access-Control-Request-Headers", "Content-Type")
 
 	rr := httptest.NewRecorder()
+	r := setupRouter()
 	r.ServeHTTP(rr, req)
 
 	// go-chi/corsの仕様
