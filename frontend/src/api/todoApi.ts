@@ -2,6 +2,20 @@ import type { Todo } from '@/types'
 
 const API_URL = 'http://localhost:8080/todos'
 
+export type TodoApi = {
+    getTodos: () => Promise<Todo[]>;
+    addTodo: (text: string) => Promise<Todo>;
+    updateTodo: (id: number, patch: Partial<Omit<Todo, 'id'>>) => Promise<Todo>;
+    deleteTodo: (id: number) => Promise<void>;
+}
+
+export const todoApi: TodoApi = {
+    getTodos,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+}
+
 export async function getTodos(): Promise<Todo[]> {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error('Failed to fetch todos');
